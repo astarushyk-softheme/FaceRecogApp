@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using FaceRecog.Domain.Settings;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.ProjectOxford.Face;
+using Microsoft.ProjectOxford.Face.Contract;
 
 namespace FaceRecog.Web.API.Services.FaceRecognition
 {
@@ -16,31 +17,13 @@ namespace FaceRecog.Web.API.Services.FaceRecognition
             _client = new FaceServiceClient(settings.Value.SubscriptionKey, settings.Value.ApiRoot);
         }
 
-        public async Task Test()
+        public async Task<Face[]> DetectAsync(IFormFile file, IEnumerable<FaceAttributeType> faceAttributes)
         {
-            var filePath = @"D:\170705133020_1_540x360.jpg";
-
-            IEnumerable<FaceAttributeType> faceAttributes =
-                new []
-                {
-                    FaceAttributeType.Gender,
-                    FaceAttributeType.Age,
-                    FaceAttributeType.Smile,
-                    FaceAttributeType.Glasses,
-                    FaceAttributeType.FacialHair,
-                    FaceAttributeType.HeadPose
-                };
-
-            try
+            using (var fileStream = file.OpenReadStream())
             {
-                using (Stream imageFileStream = File.OpenRead(filePath))
-                {
-                    var faces = await _client.DetectAsync(imageFileStream, returnFaceId: true, returnFaceLandmarks: false, returnFaceAttributes: faceAttributes);
-                }
+                var result = await _client.DetectAsync(fileStream, returnFaceId: true, returnFaceLandmarks: false, returnFaceAttributes: faceAttributes);
+                return result;
             }
-            catch
-            { }
         }
-
     }
 }

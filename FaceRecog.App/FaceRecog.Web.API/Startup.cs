@@ -18,10 +18,9 @@ namespace FaceRecog.Web.API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<ApiSettings>(options => Configuration.GetSection("ApiSettings").Bind(options));
+            services.Configure<ApiSettings>(options => Configuration.GetSection(nameof(ApiSettings)).Bind(options));
 
             services.AddTransient<IFaceRecognitionClient, FaceRecognitionClient>();
 
@@ -34,18 +33,20 @@ namespace FaceRecog.Web.API
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Face Recog App API V1");
-            });
+
+            //URL: .../swagger
+            app
+                .UseSwagger()
+                .UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Face Recog App API V1");
+                });
 
             app.UseMvc();
         }
